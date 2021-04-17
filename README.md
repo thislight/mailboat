@@ -1,6 +1,9 @@
 # Mailboat
 
-Mailboat (Chinese name: 信舟) is a email solution for organrization. It combines MTA and MUA to decrease maintaining complixity.
+Mailboat (Chinese name: 信舟) is a email solution for organisation. It combines MTA and MUA to decrease maintaining complixity.
+
+## Still in developing
+This project is under active developing, and should be avaliable soon.
 
 ## Contributing
 Please turn to "CONTRIBUTING.md" for details.
