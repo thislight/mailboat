@@ -1,0 +1,23 @@
+Mon 12 Apr. 2021
+Environment:
+    Fedora 33 (Linux 5.11.11-200.fc33.x86_64)
+    AMD Ryzen 5 4600U
+    Python 3.9.2
+    Using UnQLiteEmailQueue with UnQLite in memory
+    Test sending 100 emails using aiosmtplib
+    Only local delivery (calling local delivery callback as sending completed)
+Result:
+    3.177041 sec./100mails, 0 lost.
+    ~1888 mails per minute
+----
+Mon 12 Apr. 2021
+Environment:
+    Fedora 33 (Linux 5.11.11-200.fc33.x86_64)
+    AMD Ryzen 5 4600U
+    Python 3.9.2
+    Using MemoryEmailQueue
+    Test sending 100 emails using aiosmtplib
+    Only local delivery (calling local delivery callback as sending completed)
+Result:
+    2.965315 sec./100mails, 0 lost.
+    ~2023 mails per minute
