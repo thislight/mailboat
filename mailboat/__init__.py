@@ -45,9 +45,3 @@ class StorageHub(object):
         if not record:
             return None
         return MailBox(record, self.mail_records, self.mailstore, self.mailbox_records)
-
-
-@dataclass
-class MailboatContext(object):
-    database: UnQLite
-    storagehub: StorageHub
