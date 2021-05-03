@@ -83,3 +83,27 @@ The test set contains some performance tests, but they are skipped by default be
 ````shell
 TEST_PERFORMANCE=1 pytest
 ````
+
+## Git hooks
+There are git hooks could help you maintaining the code quality.
+### Installing
+Copy or link file(s) under "git_hooks" to ".git/hooks".
+
+````sh
+cp -Rl git_hooks/* .git/hooks/
+````
+
+### Options
+#### `hooks.allownonascii`
+Allow non-ASCII character.
+
+````sh
+git config hooks.allownonascii true
+````
+
+#### `hooks.autoformatcode`
+Auto format code before commiting.
+
+````sh
+git config hooks.autoformatcode true
+````
