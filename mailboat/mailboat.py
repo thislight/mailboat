@@ -16,17 +16,23 @@
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
 
 from email.message import EmailMessage
-from typing import Any, List, Optional
+from .usrsys.auth import AuthProvider, AuthRequest
+from typing import Any, Dict, List, Optional
 
 from aiosmtpd.smtp import AuthResult, LoginPassword, SMTP
 from .mta import TransferAgent
-from . import MailboatContext, StorageHub
+from . import StorageHub
 from unqlite import UnQLite
 
 
 class Mailboat(object):
     def __init__(
-        self, *, hostname: str, mydomains: List[str], database_path: str, smtpd_port: Optional[int] = None
+        self,
+        *,
+        hostname: str,
+        mydomains: List[str],
+        database_path: str,
+        smtpd_port: Optional[int] = None
     ) -> None:
         if not smtpd_port:
             smtpd_port = 8025
@@ -42,20 +48,27 @@ class Mailboat(object):
             smtpd_auth_handler=self.handle_smtpd_auth,
             hostname=self.hostname,
             self_name="transfer_agent.{}".format(self.hostname),
-            smtpd_port=smtpd_port
+            smtpd_port=smtpd_port,
         )
+        self.auth_provider = AuthProvider(self.storage_hub.user_records)
         super().__init__()
-    
-    async def handle_smtpd_auth(self, server: SMTP, method: str, data: Any) -> AuthResult:
-        if method == 'login' or method == 'plain':
+
+    async def handle_smtpd_auth(
+        self, server: SMTP, method: str, data: Any
+    ) -> AuthResult:
+        if method == "login" or method == "plain":
             assert isinstance(data, LoginPassword)
             username: bytes = data.login
             password: bytes = data.password
-            username_s = username.decode('utf-8') # TODO (rubicon): support the other charsets
-            result = await self.storage_hub.user_records.check_user_password(username_s, password)
-            return AuthResult(success=result, handled=True)
+            auth_request = AuthRequest(
+                username=username.decode('utf-8'),
+                password=password.decode('utf-8')
+            ) # TODO (rubicon): support the other charsets
+            result = await self.auth_provider.auth(auth_request)
+            return AuthResult(success=result.success, handled=result.handled)
         else:
             return AuthResult(success=False, handled=False)
-    
+
     async def handle_local_delivering(self, message: EmailMessage):
-        delivered_to = message['delivered-to']
+        delivered_to = message["delivered-to"]
+        # TODO (rubicon): complete local delivering
