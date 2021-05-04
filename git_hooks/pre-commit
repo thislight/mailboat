@@ -56,11 +56,11 @@ fi
 # If you want this hook automatically format code for you, use `git config hooks.autoformatcode true`
 autoformatcode=$(git config --type bool hooks.autoformatcode)
 
-code_style_checking_result=$(black --check bamboo/ tests/ >/dev/null 2>&1)
+code_style_checking_result=$(black --check mailboat/ tests/ >/dev/null 2>&1)
 
 if [ "$code_style_checking_result" = "1" ]; then
 	if [ "$autoformatcode" = "true" ]; then
-		formating_result=$(black bamboo/ tests/)
+		formating_result=$(black mailboat/ tests/)
 		if [ "$formating_result" != "0" ]; then
 			echo "Error: black return unexceptly code $formating_result while formating."
 			exit 1
