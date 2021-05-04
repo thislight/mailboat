@@ -1,3 +1,5 @@
+from typing import List, Optional
+from mailboat.usrsys.tk import TokenRecord
 from ..utils.storage import (
     DataclassCommonStorageAdapter,
     CommonStorageRecordWrapper,
@@ -17,6 +19,9 @@ class UserRecordStorage(CommonStorageRecordWrapper[UserRecord]):
             return False
         return await password_check(password, doc.password_b64hash)
 
+    async def create_new_user(self, username: str, password: bytes) -> bool:
+        pass # TODO (rubicon): create_new_user
+
 
 class ProfileRecordStorage(CommonStorageRecordWrapper[ProfileRecord]):
     def __init__(self, common_storage: CommonStorage) -> None:
@@ -31,3 +36,13 @@ class MailBoxRecordStorage(CommonStorageRecordWrapper[MailBoxRecord]):
 class MailRecordStorage(CommonStorageRecordWrapper[MailRecord]):
     def __init__(self, common_storage: CommonStorage) -> None:
         super().__init__(common_storage, DataclassCommonStorageAdapter(MailRecord))
+
+
+class TokenRecordStorage(CommonStorageRecordWrapper[TokenRecord]):
+    def __init__(self, common_storage: CommonStorage) -> None:
+        super().__init__(common_storage, DataclassCommonStorageAdapter(TokenRecord))
+
+    async def create_token(self, profileid: str, *, appid: Optional[str]=None, apprev: Optional[str]=None, scope: List[str]):
+        new_record = TokenRecord.new(profileid, appid=appid, apprev=apprev, scope=scope)
+        await self.store(new_record)
+        return new_record
