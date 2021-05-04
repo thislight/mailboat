@@ -46,3 +46,6 @@ class TokenRecordStorage(CommonStorageRecordWrapper[TokenRecord]):
         new_record = TokenRecord.new(profileid, appid=appid, apprev=apprev, scope=scope)
         await self.store(new_record)
         return new_record
+
+    async def find_token(self, token: str) -> Optional[TokenRecord]:
+        return await self.find_one({'token': token})
