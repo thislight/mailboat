@@ -127,6 +127,10 @@ class TransferAgent(object):
     def start(self):
         self.smtpd_controller.start()
 
+    @property
+    def smtpd_port(self):
+        return self.smtpd_controller.port
+
     @async_perf_point("TransferAgent.handle_message")
     async def handle_message(self, message: EmailMessage, internal: bool = False):
         if "message-id" not in message:

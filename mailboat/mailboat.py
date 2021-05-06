@@ -55,6 +55,10 @@ class Mailboat(object):
         )
         super().__init__()
 
+    @property
+    def smtpd_port(self):
+        return self.transfer_agent.smtpd_port
+
     async def handle_smtpd_auth(
         self, server: SMTP, method: str, data: Any
     ) -> AuthResult:
