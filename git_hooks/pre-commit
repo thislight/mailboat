@@ -60,8 +60,9 @@ poetry run black --check mailboat/ tests/ >/dev/null 2>&1
 
 if [ "$?" = "1" ]; then
 	if [ "$autoformatcode" = "true" ]; then
-		formating_result=$(poetry run black mailboat/ tests/)
-		if [ "$formating_result" != "0" ]; then
+		poetry run black mailboat/ tests/
+		formating_result=$?
+		if [ "$formating_result" != "1" ]; then
 			echo "Error: black return unexceptly code $formating_result while formating."
 			exit 1
 		fi
