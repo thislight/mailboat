@@ -50,7 +50,7 @@ class Mailboat(object):
             self_name="transfer_agent.{}".format(self.hostname),
             smtpd_port=smtpd_port,
         )
-        self.auth_provider = AuthProvider(self.storage_hub.user_records)
+        self.auth_provider = AuthProvider(self.storage_hub.user_records, self.storage_hub.token_records)
         super().__init__()
 
     async def handle_smtpd_auth(
@@ -71,4 +71,11 @@ class Mailboat(object):
 
     async def handle_local_delivering(self, message: EmailMessage):
         delivered_to = message["delivered-to"]
+        raise NotImplementedError
         # TODO (rubicon): complete local delivering
+
+    def start(self):
+        self.transfer_agent.start()
+
+    def stop(self):
+        self.transfer_agent.destory()
