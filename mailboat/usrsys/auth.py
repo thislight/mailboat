@@ -20,10 +20,10 @@ from dataclasses import dataclass, field
 
 @dataclass
 class AuthRequest(object):
-    username: Optional[str]
-    password: Optional[str] # TODO (rubicon): use a customised type to prevent it being logged
-    token: Optional[str]
-    appid: Optional[str]
+    username: Optional[str] = None
+    password: Optional[str] = None # TODO (rubicon): use a customised type to prevent it being logged
+    token: Optional[str] = None
+    appid: Optional[str] = None
     new_token_scope: List[str] = field(default_factory=list)
     request_token: bool = False
 
@@ -44,6 +44,7 @@ class AuthProvider(object):
         super().__init__()
 
     async def auth(self, request: AuthRequest) -> AuthAnswer:
+        # TODO: accept token checking
         if request.username and request.password:
             password_checking = await self.user_record_storage.check_user_password(request.username, request.password.encode('utf-8'))
             if password_checking:
