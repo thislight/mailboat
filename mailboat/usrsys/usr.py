@@ -3,6 +3,22 @@ from typing import Dict, List, Literal, Optional, Set
 
 MailboxID = str
 
+MAILBOX_INBOX = "Inbox"
+MAILBOX_DRAFTS = "Drafts"
+MAILBOX_SENT = "Sent"
+MAILBOX_ARCHIVES = "Archives"
+MAILBOX_JUNK = "Junk"
+MAILBOX_DELETED = "Deleted"
+
+MAILBOX_DEFAULT_SETTING = [
+    MAILBOX_INBOX,
+    MAILBOX_DRAFTS,
+    MAILBOX_SENT,
+    MAILBOX_ARCHIVES,
+    MAILBOX_JUNK,
+    MAILBOX_DELETED,
+]
+
 
 @dataclass
 class UserRecord(object):
@@ -36,4 +52,4 @@ class MailBoxRecord(object):
 class MailRecord(object):
     "MailRecord is a mark about one's having one email message."
     mailbox_id: str
-    message_id: str 
+    message_id: str

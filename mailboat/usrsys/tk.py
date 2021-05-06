@@ -27,7 +27,8 @@ from dataclasses import dataclass
 from typing import Container, List, Optional, Set
 from uuid import uuid4
 
-SCOPE_ACT_AS_USER = 'act_as_user'
+SCOPE_ACT_AS_USER = "act_as_user"
+
 
 class Scope(Container):
     def __init__(self, scope: Set[str]) -> None:
@@ -36,8 +37,8 @@ class Scope(Container):
 
     @staticmethod
     def match(defined_scope: str, requesting_scope: str) -> bool:
-        defined = defined_scope.split('.')
-        requesting = requesting_scope.split('.')
+        defined = defined_scope.split(".")
+        requesting = requesting_scope.split(".")
         for p0, p1 in zip(defined, requesting):
             if p0 != p1:
                 return False
@@ -57,11 +58,12 @@ class Scope(Container):
                     return False
         return True
 
+
 @dataclass
 class TokenRecord(object):
     token: str
     profileid: str
-    appid: str # login though username and password (not OAuth 2) is always '-1', >0 are app ids, <0 are for private
+    appid: str  # login though username and password (not OAuth 2) is always '-1', >0 are app ids, <0 are for private
     apprev: str
     scope: List[str]
 
@@ -72,7 +74,14 @@ class TokenRecord(object):
         self.scope = list(scope.scope)
 
     @classmethod
-    def new(cls, profile_id: str, *, appid: Optional[str]=None, apprev: Optional[str]=None, scope: List[str]) -> "TokenRecord":
+    def new(
+        cls,
+        profile_id: str,
+        *,
+        appid: Optional[str] = None,
+        apprev: Optional[str] = None,
+        scope: List[str]
+    ) -> "TokenRecord":
         """Shortcut to create a new token object.
         If `appid` is `None`, set it as `'-1'`; if `apprev` is `None`, set it to empty string.
         If `scope` is empty or `None`, it will be set to `['act_as_user']`.
@@ -81,9 +90,11 @@ class TokenRecord(object):
         """
         tokenid = str(uuid4())
         if not appid:
-            appid = '-1'
+            appid = "-1"
         if not apprev:
-            apprev = ''
+            apprev = ""
         if not scope:
             scope = [SCOPE_ACT_AS_USER]
-        return cls(token=tokenid, profileid=profile_id, appid=appid, apprev=apprev, scope=scope)
+        return cls(
+            token=tokenid, profileid=profile_id, appid=appid, apprev=apprev, scope=scope
+        )

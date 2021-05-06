@@ -21,8 +21,15 @@ from ..mailstore import MailStore, MailStoreRecord
 from ..utils.storage import CommonStorage
 from .storage import MailBoxRecordStorage, MailRecordStorage
 
+
 class MailBox(object):
-    def __init__(self, mailbox_rec: MailBoxRecord, mail_rec_storage: MailRecordStorage, mail_store: MailStore, mailbox_rec_storage: MailBoxRecordStorage) -> None:
+    def __init__(
+        self,
+        mailbox_rec: MailBoxRecord,
+        mail_rec_storage: MailRecordStorage,
+        mail_store: MailStore,
+        mailbox_rec_storage: MailBoxRecordStorage,
+    ) -> None:
         self.mailbox_record = mailbox_rec
         self.mail_record_storage = mail_rec_storage
         self.mail_store = mail_store

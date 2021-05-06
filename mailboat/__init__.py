@@ -3,7 +3,13 @@ from typing import Optional
 from mailboat.usrsys.usr import MailBoxRecord
 from .usrsys.mailbox import MailBox
 from .mailstore import MailStore
-from .usrsys.storage import MailBoxRecordStorage, MailRecordStorage, ProfileRecordStorage, UserRecordStorage, TokenRecordStorage
+from .usrsys.storage import (
+    MailBoxRecordStorage,
+    MailRecordStorage,
+    ProfileRecordStorage,
+    UserRecordStorage,
+    TokenRecordStorage,
+)
 from unqlite import UnQLite
 from .utils.storage import CommonStorage, UnQLiteStorage
 
@@ -25,11 +31,11 @@ class StorageHub(object):
     @property
     def profile_records(self) -> ProfileRecordStorage:
         return ProfileRecordStorage(self.get_common_storage("profiles"))
-    
+
     @property
     def mailbox_records(self) -> MailBoxRecordStorage:
         return MailBoxRecordStorage(self.get_common_storage("mailboxs"))
-    
+
     @property
     def mail_records(self) -> MailRecordStorage:
         return MailRecordStorage(self.get_common_storage("mail_records"))
@@ -45,7 +51,7 @@ class StorageHub(object):
     async def get_mailbox(self, boxid: str) -> Optional[MailBox]:
         if not boxid:
             return None
-        record = await self.mailbox_records.find_one({'identity': boxid})
+        record = await self.mailbox_records.find_one({"identity": boxid})
         if not record:
             return None
         return MailBox(record, self.mail_records, self.mailstore, self.mailbox_records)

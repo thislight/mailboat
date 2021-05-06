@@ -50,7 +50,9 @@ class Mailboat(object):
             self_name="transfer_agent.{}".format(self.hostname),
             smtpd_port=smtpd_port,
         )
-        self.auth_provider = AuthProvider(self.storage_hub.user_records, self.storage_hub.token_records)
+        self.auth_provider = AuthProvider(
+            self.storage_hub.user_records, self.storage_hub.token_records
+        )
         super().__init__()
 
     async def handle_smtpd_auth(
@@ -61,9 +63,8 @@ class Mailboat(object):
             username: bytes = data.login
             password: bytes = data.password
             auth_request = AuthRequest(
-                username=username.decode('utf-8'),
-                password=password.decode('utf-8')
-            ) # TODO (rubicon): support the other charsets
+                username=username.decode("utf-8"), password=password.decode("utf-8")
+            )  # TODO (rubicon): support the other charsets
             result = await self.auth_provider.auth(auth_request)
             return AuthResult(success=result.success, handled=result.handled)
         else:
