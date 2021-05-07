@@ -92,7 +92,7 @@ TEST_PERFORMANCE=1 pytest
 ## Git hooks
 There are git hooks could help you maintaining the code quality.
 
-We have switched to use [pre-commit](https://pre-commit.org) as the hooks manager after 7 May 2021.
+We have switched to use [pre-commit](https://pre-commit.com) as the hooks manager after 7 May 2021.
 
 You could install hooks though the CLI:
 ````shell
