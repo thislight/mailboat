@@ -97,6 +97,7 @@ class TransferAgent(object):
         self_name: str = "mailboat.transfer_agent",
         smtpd_port: int = 8025,
         custom_queue: Optional[EmailQueue] = None,
+        auth_require_tls: bool = True,
     ) -> None:
         self.mydomains = mydomains
         self.database = database
@@ -116,7 +117,9 @@ class TransferAgent(object):
             ),
             port=smtpd_port,
             hostname=hostname,
+            auth_require_tls=auth_require_tls,
         )
+        self._auth_require_tls = auth_require_tls
         self.local_delivery_handler = local_delivery_handler
         self._task_deliveryman = asyncio.ensure_future(self._cothread_deliveryman())
 
@@ -130,6 +133,10 @@ class TransferAgent(object):
     @property
     def smtpd_port(self):
         return self.smtpd_controller.port
+
+    @property
+    def auth_require_tls(self) -> bool:
+        return self._auth_require_tls
 
     @async_perf_point("TransferAgent.handle_message")
     async def handle_message(self, message: EmailMessage, internal: bool = False):
