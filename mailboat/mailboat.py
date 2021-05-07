@@ -16,6 +16,7 @@
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
 
 from email.message import EmailMessage
+from .usrsys.usr import UserRecord
 from .usrsys.auth import AuthProvider, AuthRequest
 from typing import Any, Dict, List, Optional
 
@@ -32,7 +33,8 @@ class Mailboat(object):
         hostname: str,
         mydomains: List[str],
         database_path: str,
-        smtpd_port: Optional[int] = None
+        smtpd_port: Optional[int] = None,
+        auth_require_tls: bool = True,
     ) -> None:
         if not smtpd_port:
             smtpd_port = 8025
@@ -89,3 +91,14 @@ class Mailboat(object):
 
     def stop(self):
         self.transfer_agent.destory()
+
+    async def new_user(
+        self, username: str, nickname: str, email_address: str, password: str
+    ) -> UserRecord:
+        user = await self.storage_hub.create_user(username, password.encode("ascii"))
+        user.nickname = nickname
+        user.email_address = email_address
+        await self.storage_hub.user_records.update_one(
+            {"profileid": user.profileid}, user
+        )
+        return user
