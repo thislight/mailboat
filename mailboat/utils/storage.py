@@ -113,6 +113,9 @@ class DataclassCommonStorageAdapter(Generic[T], CommonStorageAdapter[T]):
         super().__init__()
 
     def dict2record(self, d: Dict[str, Any]) -> T:
+        d = d.copy()
+        if "__id" in d:
+            d.pop("__id")
         return self.datacls(**d)  # type: ignore # it should work
 
     def record2dict(self, record: T) -> Dict[str, Any]:
