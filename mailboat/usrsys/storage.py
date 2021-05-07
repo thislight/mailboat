@@ -32,7 +32,7 @@ class UserRecordStorage(CommonStorageRecordWrapper[UserRecord]):
             mailboxes={},
             email_address=None,
         )
-        self.store(rec)
+        await self.store(rec)
         return rec
 
 
@@ -44,7 +44,7 @@ class ProfileRecordStorage(CommonStorageRecordWrapper[ProfileRecord]):
         rec = ProfileRecord(
             identity=uuid4().hex,
         )
-        self.store(rec)
+        await self.store(rec)
         return rec
 
 
@@ -59,7 +59,7 @@ class MailBoxRecordStorage(CommonStorageRecordWrapper[MailBoxRecord]):
             permanent_flags=set(),
             session_flags=set(),
         )
-        self.store(rec)
+        await self.store(rec)
         return rec
 
 
