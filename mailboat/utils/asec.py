@@ -9,7 +9,7 @@ def password_hashing_sync(password: bytes) -> str:
         argon2id.str(
             password,
             opslimit=argon2id.OPSLIMIT_SENSITIVE,
-            memlimit=argon2id.OPSLIMIT_SENSITIVE,
+            memlimit=argon2id.MEMLIMIT_SENSITIVE,
         )
     ).decode("ascii")
 
