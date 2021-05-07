@@ -47,11 +47,6 @@ def imap_response_find_value_of(data: list[str], key: str) -> Optional[str]:
     return None
 
 
-def assert_aiosmtplib_send_response_all_positive(responses):
-    for k, v in zip(responses.keys(), responses.values()):
-        assert v.code > 200 and v.code < 300
-
-
 @pytest.fixture
 def mailboat():
     instance = Mailboat(
@@ -86,15 +81,14 @@ class TestMailboatFunction:
             "I am writing to you and I am using mailboat's server now."
         )
         alyx_hello_mail.set_charset("UTF8")
-        (responses,) = await aiosmtplib.send(
+        (responses, status) = await aiosmtplib.send(
             alyx_hello_mail,
             hostname="localhost",
             port=mailboat.smtpd_port,
             username="alyx",
             password="alyxpassword",
         )
-        assert responses
-        assert_aiosmtplib_send_response_all_positive(responses)
+        assert status == "OK"
         # Freeman sign in to IMAP mailbox
         freeman_imap_client = aioimaplib.IMAP4(port=mailboat.imapd_port)
         await freeman_imap_client.wait_hello_from_server()
@@ -127,15 +121,14 @@ class TestMailboatFunction:
         # TODO: check reply
         freeman_reply["subject"] = "Wow! Welcome here!"
         freeman_reply.set_content("It's great to see you here.")
-        (responses,) = await aiosmtplib.send(
+        (responses, status) = await aiosmtplib.send(
             freeman_reply,
             hostname="localhost",
             port=mailboat.smtpd_port,
             username="freeman",
             password="freemanpassword",
         )
-        assert responses
-        assert_aiosmtplib_send_response_all_positive(responses)
+        assert status == "OK"
         # Freeman leaves
         await freeman_imap_client.logout()
         # Alyx sign in to IMAP mailbox
