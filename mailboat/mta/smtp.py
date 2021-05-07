@@ -19,14 +19,14 @@ from aiosmtpd.handlers import AsyncMessage
 from aiosmtpd.smtp import AuthResult, SMTP, LoginPassword
 import aiosmtpd
 from base64 import standard_b64decode
-from typing import Callable, List, Awaitable, Any, cast
+from typing import Callable, List, Awaitable, Any, Union, cast
 from email.message import EmailMessage
 import logging
 from .protocols import SMTPAuthHandler
 
 
 class SMTPDHandler(AsyncMessage):  # TODO: support OAuth2
-    __logger = logging.getLogger("mailboat.mta._SMTPDHandler")
+    __logger = logging.getLogger(__name__)
 
     def __init__(
         self,
@@ -53,7 +53,11 @@ class SMTPDHandler(AsyncMessage):  # TODO: support OAuth2
         )
 
     async def auth_PLAIN(self, server: SMTP, args: List[str]) -> AuthResult:
-        words = await server.challenge_auth("", encode_to_b64=False)
+        words: Any
+        if len(args) == 2:
+            words = args[1]
+        else:
+            words = await server.challenge_auth("", encode_to_b64=False)
         if words == aiosmtpd.smtp.MISSING:
             return AuthResult(success=False, handled=False)
         decoded_words = standard_b64decode(cast(bytes, words))
