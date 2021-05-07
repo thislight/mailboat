@@ -162,7 +162,7 @@ class UnQLiteStorage(CommonStorage):
     ) -> None:
         for doc in self.new_collection.filter(lambda d: self.doc_match(d, query)):
             queue.put_nowait(doc)
-        queue.put(None)
+        queue.put_nowait(None)
 
     async def find(self, query: Dict[str, Any]) -> AsyncIterable[Dict[str, Any]]:
         queue: asyncio.Queue[Dict[str, Any]] = asyncio.Queue()
