@@ -62,7 +62,7 @@ if [ "$?" = "1" ]; then
 	if [ "$autoformatcode" = "true" ]; then
 		poetry run black mailboat/ tests/
 		formating_result=$?
-		if [ "$formating_result" != "1" ]; then
+		if [ "$formating_result" != "0" ]; then
 			echo "Error: black return unexceptly code $formating_result while formating."
 			exit 1
 		fi
