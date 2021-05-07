@@ -49,6 +49,7 @@ class Mailboat(object):
             hostname=self.hostname,
             self_name="transfer_agent.{}".format(self.hostname),
             smtpd_port=smtpd_port,
+            auth_require_tls=auth_require_tls,
         )
         self.auth_provider = AuthProvider(
             self.storage_hub.user_records, self.storage_hub.token_records
@@ -58,6 +59,10 @@ class Mailboat(object):
     @property
     def smtpd_port(self):
         return self.transfer_agent.smtpd_port
+
+    @property
+    def auth_require_tls(self) -> bool:
+        return self.transfer_agent.auth_require_tls
 
     async def handle_smtpd_auth(
         self, server: SMTP, method: str, data: Any
