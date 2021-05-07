@@ -32,7 +32,9 @@ jobs:
         poetry install
     - name: Test
       run: |
+        source $HOME/.poetry/env
         poetry run pytest
     - name: Performance Test
       run: |
+      source $HOME/.poetry/env
         TEST_PERFORMANCE=1 poetry run pytest tests/test_performance/
