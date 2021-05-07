@@ -24,6 +24,7 @@ Currently usrsys defines these scopes:
 """
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Container, List, Optional, Set
 from uuid import uuid4
 
@@ -66,6 +67,7 @@ class TokenRecord(object):
     appid: str  # login though username and password (not OAuth 2) is always '-1', >0 are app ids, <0 are for private
     apprev: str
     scope: List[str]
+    expiration: Optional[int] = None
 
     def get_scope_object(self) -> Scope:
         return Scope(set(self.scope))
@@ -80,7 +82,8 @@ class TokenRecord(object):
         *,
         appid: Optional[str] = None,
         apprev: Optional[str] = None,
-        scope: List[str]
+        scope: List[str] = None,
+        expiration_offest_seconds: Optional[int] = None,
     ) -> "TokenRecord":
         """Shortcut to create a new token object.
         If `appid` is `None`, set it as `'-1'`; if `apprev` is `None`, set it to empty string.
@@ -95,6 +98,16 @@ class TokenRecord(object):
             apprev = ""
         if not scope:
             scope = [SCOPE_ACT_AS_USER]
+        if expiration_offest_seconds:
+            expir = int(datetime.utcnow().timestamp()) + expiration_offest_seconds
         return cls(
-            token=tokenid, profileid=profile_id, appid=appid, apprev=apprev, scope=scope
+            token=tokenid,
+            profileid=profile_id,
+            appid=appid,
+            apprev=apprev,
+            scope=scope,
+            expiration=(expir if expir else None),
         )
+
+    def is_avaliable(self):
+        return self.expiration < datetime.utcnow().timestamp()
