@@ -1,12 +1,13 @@
 from typing import List, Optional
-from mailboat.usrsys.tk import TokenRecord
+from .tk import TokenRecord
 from ..utils.storage import (
     DataclassCommonStorageAdapter,
     CommonStorageRecordWrapper,
     CommonStorage,
 )
-from .usr import MailBoxRecord, MailRecord, UserRecord, ProfileRecord
-from ..utils.asec import password_check
+from .usr import MailBoxRecord, MailRecord, ProfileRecord, UserRecord, ProfileRecord
+from ..utils.asec import password_check, password_hashing
+from uuid import uuid4
 
 
 class UserRecordStorage(CommonStorageRecordWrapper[UserRecord]):
@@ -19,18 +20,47 @@ class UserRecordStorage(CommonStorageRecordWrapper[UserRecord]):
             return False
         return await password_check(password, doc.password_b64hash)
 
-    async def create_new_user(self, username: str, password: bytes) -> bool:
-        pass  # TODO (rubicon): create_new_user
+    async def create_new_user(
+        self, username: str, password: bytes, profileid: str
+    ) -> UserRecord:
+        """Shortcut to create a new user. It does not mean the new user is avaliable, you should also create other resources for the user."""
+        rec = UserRecord(
+            nickname="",
+            username=username,
+            password_b64hash=await password_hashing(password),
+            profileid=profileid,
+            mailboxes={},
+            email_address=None,
+        )
+        self.store(rec)
+        return rec
 
 
 class ProfileRecordStorage(CommonStorageRecordWrapper[ProfileRecord]):
     def __init__(self, common_storage: CommonStorage) -> None:
         super().__init__(common_storage, DataclassCommonStorageAdapter(ProfileRecord))
 
+    async def create_new_profile(self) -> ProfileRecord:
+        rec = ProfileRecord(
+            identity=uuid4().hex,
+        )
+        self.store(rec)
+        return rec
+
 
 class MailBoxRecordStorage(CommonStorageRecordWrapper[MailBoxRecord]):
     def __init__(self, common_storage: CommonStorage) -> None:
         super().__init__(common_storage, DataclassCommonStorageAdapter(MailBoxRecord))
+
+    async def create_mailbox(self) -> MailBoxRecord:
+        rec = MailBoxRecord(
+            identity=uuid4().hex,
+            readonly=False,
+            permanent_flags=set(),
+            session_flags=set(),
+        )
+        self.store(rec)
+        return rec
 
 
 class MailRecordStorage(CommonStorageRecordWrapper[MailRecord]):
