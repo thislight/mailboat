@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from typing import Optional
-from mailboat.usrsys.usr import MailBoxRecord
+from mailboat.usrsys.usr import MAILBOX_DEFAULT_SETTING, MailBoxRecord, UserRecord
 from .usrsys.mailbox import MailBox
 from .mailstore import MailStore
 from .usrsys.storage import (
@@ -55,3 +55,14 @@ class StorageHub(object):
         if not record:
             return None
         return MailBox(record, self.mail_records, self.mailstore, self.mailbox_records)
+
+    async def create_user(self, username: str, password: bytes) -> UserRecord:
+        profile = await self.profile_records.create_new_profile()
+        user = await self.user_records.create_new_user(
+            username, password, profile.identity
+        )
+        for name in MAILBOX_DEFAULT_SETTING:
+            mailbox = await self.mailbox_records.create_mailbox()
+            user.mailboxes[name] = mailbox.identity
+        await self.user_records.update_one({"profileid": user.profileid}, user)
+        return user
