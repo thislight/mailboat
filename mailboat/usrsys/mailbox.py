@@ -39,3 +39,7 @@ class MailBox(object):
     @property
     def id(self):
         return self.mailbox_record.identity
+
+    @property
+    def readonly(self):
+        return False  # TODO: implement readonly mailbox
