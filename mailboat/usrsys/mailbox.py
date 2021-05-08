@@ -35,3 +35,7 @@ class MailBox(object):
         self.mail_store = mail_store
         self.mailbox_record_storage = mailbox_rec_storage
         super().__init__()
+
+    @property
+    def id(self):
+        return self.mailbox_record.identity
