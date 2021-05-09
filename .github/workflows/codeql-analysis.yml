@@ -24,7 +24,7 @@ on:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu:hirsute
+    runs-on: ubuntu-hirsute
     permissions:
       actions: read
       contents: read
