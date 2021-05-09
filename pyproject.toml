@@ -6,7 +6,7 @@ authors = ["The Mailboat Contributors"]
 license = "GPL-3.0-or-later"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4.0"
+python = ">=3.9,<4.0"
 aiosmtpd = "^1.4.2"
 pymap = "^0.23.1"
 tornado = "^6.1"
