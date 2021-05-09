@@ -1,5 +1,23 @@
 from dataclasses import dataclass
-from typing import Literal, Optional
+from typing import Dict, List, Literal, Optional, Set
+
+MailboxID = str
+
+MAILBOX_INBOX = "Inbox"
+MAILBOX_DRAFTS = "Drafts"
+MAILBOX_SENT = "Sent"
+MAILBOX_ARCHIVES = "Archives"
+MAILBOX_JUNK = "Junk"
+MAILBOX_DELETED = "Deleted"
+
+MAILBOX_DEFAULT_SETTING = [
+    MAILBOX_INBOX,
+    MAILBOX_DRAFTS,
+    MAILBOX_SENT,
+    MAILBOX_ARCHIVES,
+    MAILBOX_JUNK,
+    MAILBOX_DELETED,
+]
 
 
 @dataclass
@@ -8,7 +26,7 @@ class UserRecord(object):
     username: str
     password_b64hash: str
     profileid: str
-    mailbox_id: str
+    mailboxes: Dict[str, MailboxID]  # name, mailbox id
     email_address: Optional[str] = None
 
 
@@ -22,6 +40,16 @@ class ProfileRecord(object):
 
 
 @dataclass
+class MailBoxRecord(object):
+    "MailBoxRecord saves meta infomation about one mailbox."
+    identity: str
+    readonly: bool
+    permanent_flags: Set[str]
+    session_flags: Set[str]
+
+
+@dataclass
 class MailRecord(object):
-    path: str
-    message_id: Optional[str]
+    "MailRecord is a mark about one's having one email message."
+    mailbox_id: str
+    message_id: str

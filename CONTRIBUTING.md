@@ -1,10 +1,15 @@
 # Contributing
 
 ## Development & running environment
-Use [poetry](https://python-poetry.org/):  
+Use [poetry](https://python-poetry.org/):
 (under project root)
 ````
 poetry install
+````
+
+Install git pre-commit hooks:
+````
+poetry run pre-commit install
 ````
 
 Then you could prefix your command with `poetry run`:
@@ -14,7 +19,7 @@ poetry run pytest # run test set
 Or use `poetry shell` for a virtualenv's shell.
 
 ## Making contribution to code/docs
-Please read "Code" section in this file before writing code for mailboat. If you want to make yourself familiar with the code, turn to "docs/code_guide.md".  
+Please read "Code" section in this file before writing code for mailboat. If you want to make yourself familiar with the code, turn to "docs/code_guide.md".
 Follow the guidelines while you are writing documents (if they have).
 
 1. Fork
@@ -26,7 +31,7 @@ If you have problem with GitHub and comfort to git-email workflow, you can send 
 After any contributing, you automatically become one of the contributors, but you need to claim yourself in "CONTRIBUTORS" to have the rights.
 
 ## Firing issue
-Before firing issue, you should look at manual and FAQ.  
+Before firing issue, you should look at manual and FAQ.
 For security issues, please directly send an email to maintainer, see "CONTRIBUTING.md".
 
 Your issue may contains four parts and should be in English:
@@ -39,12 +44,12 @@ There are no template, use any way you want to split them out. Add them if you h
 
 Your issue title should claim "the problem" clearly, for example:
 
-Good: "The MTA server crashed by RuntimeError after a normal email came"  
+Good: "The MTA server crashed by RuntimeError after a normal email came"
 Bad: "The MTA server crashed"
 
 Use technical words (if you could) will clear your meaning:
 
-Good: "The emails which send to address suffixed with .org are unexceptedly dropped"  
+Good: "The emails which send to address suffixed with .org are unexceptedly dropped"
 Bad: "The emails which have special pattern are gone.
 
 
@@ -72,7 +77,7 @@ The release cycle is still maintained by maintainer.
 
 
 ## Code
-Use "black" to format all code files, including mailboat itself and tests. 
+Use "black" to format all code files, including mailboat itself and tests.
 
 ## Testing
 We use "pytest" as the testing framework. It should be automatically installed when you are installing the development environment by poetry (You need to specify you don't need install them if you don't need, by `--no-dev` option for `poetry install`).
@@ -82,4 +87,15 @@ The test set contains some performance tests, but they are skipped by default be
 
 ````shell
 TEST_PERFORMANCE=1 pytest
+````
+
+## Git hooks
+There are git hooks could help you maintaining the code quality.
+
+We have switched to use [pre-commit](https://pre-commit.com) as the hooks manager after 7 May 2021.
+
+You could install hooks though the CLI:
+````shell
+# If you doesn't entered the virtualenv, use "poetry shell"
+pre-commit install
 ````

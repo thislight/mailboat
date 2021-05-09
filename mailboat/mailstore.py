@@ -40,6 +40,8 @@ class MailStoreRecord(object):
 
 
 class MailStore(CommonStorageRecordWrapper[MailStoreRecord]):
+    """Interface for emails."""
+
     def __init__(self, common_storage: CommonStorage) -> None:
         super().__init__(common_storage, DataclassCommonStorageAdapter(MailStoreRecord))
 

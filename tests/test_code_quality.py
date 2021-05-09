@@ -14,3 +14,11 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+import subprocess
+
+
+def test_code_is_formatted():
+    result = subprocess.run(
+        ("poetry", "run", "black", "--check", "mailboat/", "tests/")
+    )
+    assert result.returncode == 0, "the code should be formatted"

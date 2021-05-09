@@ -16,17 +16,25 @@
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
 
 from email.message import EmailMessage
-from typing import Any, List, Optional
+from .usrsys.usr import UserRecord
+from .usrsys.auth import AuthProvider, AuthRequest
+from typing import Any, Dict, List, Optional
 
 from aiosmtpd.smtp import AuthResult, LoginPassword, SMTP
 from .mta import TransferAgent
-from . import MailboatContext, StorageHub
+from . import StorageHub
 from unqlite import UnQLite
 
 
 class Mailboat(object):
     def __init__(
-        self, *, hostname: str, mydomains: List[str], database_path: str, smtpd_port: Optional[int] = None
+        self,
+        *,
+        hostname: str,
+        mydomains: List[str],
+        database_path: str,
+        smtpd_port: Optional[int] = None,
+        auth_require_tls: bool = True,
     ) -> None:
         if not smtpd_port:
             smtpd_port = 8025
@@ -42,20 +50,55 @@ class Mailboat(object):
             smtpd_auth_handler=self.handle_smtpd_auth,
             hostname=self.hostname,
             self_name="transfer_agent.{}".format(self.hostname),
-            smtpd_port=smtpd_port
+            smtpd_port=smtpd_port,
+            auth_require_tls=auth_require_tls,
+        )
+        self.auth_provider = AuthProvider(
+            self.storage_hub.user_records, self.storage_hub.token_records
         )
         super().__init__()
-    
-    async def handle_smtpd_auth(self, server: SMTP, method: str, data: Any) -> AuthResult:
-        if method == 'login' or method == 'plain':
+
+    @property
+    def smtpd_port(self):
+        return self.transfer_agent.smtpd_port
+
+    @property
+    def auth_require_tls(self) -> bool:
+        return self.transfer_agent.auth_require_tls
+
+    async def handle_smtpd_auth(
+        self, server: SMTP, method: str, data: Any
+    ) -> AuthResult:
+        if method == "login" or method == "plain":
             assert isinstance(data, LoginPassword)
             username: bytes = data.login
             password: bytes = data.password
-            username_s = username.decode('utf-8') # TODO (rubicon): support the other charsets
-            result = await self.storage_hub.user_records.check_user_password(username_s, password)
-            return AuthResult(success=result, handled=True)
+            auth_request = AuthRequest(
+                username=username.decode("utf-8"), password=password.decode("utf-8")
+            )  # TODO (rubicon): support the other charsets
+            result = await self.auth_provider.auth(auth_request)
+            return AuthResult(success=result.success, handled=result.handled)
         else:
             return AuthResult(success=False, handled=False)
-    
+
     async def handle_local_delivering(self, message: EmailMessage):
-        delivered_to = message['delivered-to']
+        delivered_to = message["delivered-to"]
+        raise NotImplementedError
+        # TODO (rubicon): complete local delivering
+
+    def start(self):
+        self.transfer_agent.start()
+
+    def stop(self):
+        self.transfer_agent.destory()
+
+    async def new_user(
+        self, username: str, nickname: str, email_address: str, password: str
+    ) -> UserRecord:
+        user = await self.storage_hub.create_user(username, password.encode("ascii"))
+        user.nickname = nickname
+        user.email_address = email_address
+        await self.storage_hub.user_records.update_one(
+            {"profileid": user.profileid}, user
+        )
+        return user

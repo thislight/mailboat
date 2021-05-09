@@ -14,7 +14,10 @@ import asyncio
 from os import environ
 
 
-@pytest.mark.skipif(environ.get("TEST_PERFORMANCE") != "1", reason="performance testing will be skipped without TEST_PERFORMANCE=1")
+@pytest.mark.skipif(
+    environ.get("TEST_PERFORMANCE") != "1",
+    reason="performance testing will be skipped without TEST_PERFORMANCE=1",
+)
 class TestTransferAgentPerformance:
     @pytest.mark.asyncio
     async def test_local_delivery_in_unqlite_memory_queue(self, unused_tcp_port: int):

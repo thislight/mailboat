@@ -14,3 +14,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+from typing import Generic, TypeVar
+
+T = TypeVar("T")
+
+
+class Ref(Generic[T]):
+    def __init__(self, val: T) -> None:
+        self.val = val
+        self.refc = 0
+
+    def ref(self) -> T:
+        self.refc += 1
+        return self.val
+
+    def unref(self) -> None:
+        self.refc -= 1

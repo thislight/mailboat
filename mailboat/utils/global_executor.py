@@ -5,6 +5,7 @@ _global_thread_pool_executor: Optional[ThreadPoolExecutor] = None
 
 
 def get() -> ThreadPoolExecutor:
+    global _global_thread_pool_executor
     if not _global_thread_pool_executor:
         _global_thread_pool_executor = ThreadPoolExecutor(
             None, "mailboat.utils.global_thread_pool_executor"
