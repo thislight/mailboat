@@ -16,6 +16,7 @@ dkimpy = "^1.0.5"
 flanker = "^0.9.11"
 aiosmtplib = "^1.1.4"
 pynacl = "^1.4.0"
+httpx = "^0.18.1"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

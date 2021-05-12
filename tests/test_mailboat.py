@@ -20,6 +20,7 @@ import aiosmtplib
 from aioimaplib import aioimaplib
 from email.message import EmailMessage
 from mailboat.mailboat import Mailboat
+from .utils import mailboat
 
 
 def imap_response_find_value_of(data: list[str], key: str) -> Optional[str]:
@@ -47,24 +48,9 @@ def imap_response_find_value_of(data: list[str], key: str) -> Optional[str]:
     return None
 
 
-@pytest.fixture
-def mailboat():
-    instance = Mailboat(
-        hostname="localhost",
-        mydomains="foo.bar",
-        database_path=":mem:",
-        auth_require_tls=False,  # TODO: add tests to check if the option enabled by default
-    )
-    try:
-        instance.start()
-        yield instance
-    finally:
-        instance.stop()
-
-
 class TestMailboatFunction:
     @pytest.mark.asyncio
-    async def test_sending_and_receiving_email(self, mailboat):
+    async def test_sending_and_receiving_email(self, mailboat: Mailboat):
         # Here we have two friends: Alyx and Freeman
         # Today Alyx wants to try out mailboat, she sign up a account
         await mailboat.new_user("alyx", "Alyx", "alyx@foo.bar", "alyxpassword")

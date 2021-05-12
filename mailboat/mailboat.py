@@ -18,12 +18,15 @@
 from email.message import EmailMessage
 from .usrsys.usr import UserRecord
 from .usrsys.auth import AuthProvider, AuthRequest
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
+from .apigate import HTTPAPIGateway
 
 from aiosmtpd.smtp import AuthResult, LoginPassword, SMTP
 from .mta import TransferAgent
 from . import StorageHub
 from unqlite import UnQLite
+
+import httpx
 
 
 class Mailboat(object):
@@ -35,7 +38,10 @@ class Mailboat(object):
         database_path: str,
         smtpd_port: Optional[int] = None,
         auth_require_tls: bool = True,
+        http_api_gate_binds: List[Tuple[Optional[str], int]] = None,
+        debug: bool = False,
     ) -> None:
+        self.debug = debug
         if not smtpd_port:
             smtpd_port = 8025
         self.mydomains = mydomains
@@ -55,6 +61,10 @@ class Mailboat(object):
         )
         self.auth_provider = AuthProvider(
             self.storage_hub.user_records, self.storage_hub.token_records
+        )
+        self.http_api_gate = HTTPAPIGateway(
+            self.storage_hub,
+            http_binds=http_api_gate_binds if http_api_gate_binds else [],
         )
         super().__init__()
 
@@ -86,11 +96,13 @@ class Mailboat(object):
         raise NotImplementedError
         # TODO (rubicon): complete local delivering
 
-    def start(self):
+    async def start(self):
         self.transfer_agent.start()
+        await self.http_api_gate.start()
 
-    def stop(self):
+    async def stop(self):
         self.transfer_agent.destory()
+        await self.http_api_gate.stop()
 
     async def new_user(
         self, username: str, nickname: str, email_address: str, password: str
@@ -102,3 +114,6 @@ class Mailboat(object):
             {"profileid": user.profileid}, user
         )
         return user
+
+    def http_api_gate_client(self) -> httpx.AsyncClient:
+        return self.http_api_gate.http_client()
