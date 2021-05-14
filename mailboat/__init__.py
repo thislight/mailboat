@@ -36,7 +36,7 @@ class Mailboat(object):
     - Mail User Agent (in developing)
     - HTTP API Gateway (in developing)
 
-    This class is also provided as a bridge between different components.
+    This class is also provided as a bridge among different components.
 
     .. caution:: Though many properties could be changed in runtime, be notice on the side effect!
     """
