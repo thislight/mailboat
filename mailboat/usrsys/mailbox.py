@@ -14,6 +14,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+"""
+`MailBox`: The logic mailbox.
+"""
 from email.message import EmailMessage
 from typing import AsyncIterator, Optional, Tuple
 from .usr import MailBoxRecord
@@ -23,6 +26,18 @@ from .storage import MailBoxRecordStorage, MailRecordStorage
 
 
 class MailBox(object):
+    """Logic mailbox.
+
+    This class is an easy interface to a mailbox.
+
+    Related:
+
+    - `mailboat.usrsys.usr.MailBoxRecord`
+    - `mailboat.usrsys.storage.MailRecordStorage`
+    - `mailboat.mailstore.MailStore`
+    - `mailboat.usrsys.storage.MailBoxRecordStorage`
+    """
+
     def __init__(
         self,
         mailbox_rec: MailBoxRecord,
@@ -38,6 +53,7 @@ class MailBox(object):
 
     @property
     def id(self):
+        """The mailbox identity."""
         return self.mailbox_record.identity
 
     @property

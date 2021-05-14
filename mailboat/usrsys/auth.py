@@ -14,6 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+"""`AuthRequest`, `AuthAnswer` and `AuthProvider`: The authentication tools for the user system.
+"""
 from mailboat.usrsys.storage import TokenRecordStorage, UserRecordStorage
 from typing import List, Optional
 from dataclasses import dataclass, field
@@ -21,6 +23,37 @@ from dataclasses import dataclass, field
 
 @dataclass
 class AuthRequest(object):
+    """The request for authentication.
+
+    Attributes:
+        username: `Optional[str]`.
+        password: `Optional[str]`.
+        token: `Optional[str]`. The token string.
+        appid: `Optional[str]`. The application identity.
+        new_token_scope: `List[str]`. The scope of new token.
+        request_token: `bool`. If request a new token.
+
+    Typical usages:
+
+    Verify the user with username and password:
+    ````python
+    AuthRequest(
+        username = "...",
+        password = "...",
+    )
+    ````
+
+    Verify the user with username and password, and request a token:
+    ````python
+    AuthRequest(
+        username = "...",
+        password = "...",
+        request_token = "...",
+        new_token_scope = ["act_as_user"], # and/or any other
+    )
+    ````
+    """
+
     username: Optional[str] = None
     password: Optional[
         str
@@ -33,6 +66,16 @@ class AuthRequest(object):
 
 @dataclass
 class AuthAnswer(object):
+    """The answer for authentication.
+
+    Attributes:
+        handled: `bool`. If the request can be handled correctly.
+        success: `bool`. The result of the authentication.
+        required_second_factors: `List[str]`. One of these second factors is required for authtication.
+        scope: `List[str]`. The scope of the `token`.
+        token: `Optional[str]`. The `token` string.
+    """
+
     handled: bool
     success: bool
     required_second_factors: List[str]
@@ -41,6 +84,8 @@ class AuthAnswer(object):
 
 
 class AuthProvider(object):
+    """Provide authentication to other concepts of Mailboat."""
+
     def __init__(
         self,
         user_record_storage: UserRecordStorage,
@@ -51,6 +96,7 @@ class AuthProvider(object):
         super().__init__()
 
     async def auth(self, request: AuthRequest) -> AuthAnswer:
+        """Process an authentication request."""
         # TODO: accept token checking
         if request.username and request.password:
             password_checking = await self.user_record_storage.check_user_password(
