@@ -99,6 +99,7 @@ class Mailboat(object):
         """This function is to handle authentication requests from SMTP server.
 
         Current supported methods:
+
         - login
         - plain
 
