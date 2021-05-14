@@ -27,6 +27,18 @@ from unqlite import UnQLite
 
 
 class Mailboat(object):
+    """The entry of Mailboat. This class stores configuration and tools to keep other components running.
+
+    Mailboat splits its feature units as reusable components. Current in-design components include:
+
+    - User System (`mailboat.usrsys`)
+    - Mail Transfer Agent (`mailboat.mta`)
+    - Mail User Agent (in developing)
+    - HTTP API Gateway (in developing)
+
+    This class is also provided as a bridge between different components.
+    """
+
     def __init__(
         self,
         *,
@@ -39,10 +51,18 @@ class Mailboat(object):
         if not smtpd_port:
             smtpd_port = 8025
         self.mydomains = mydomains
+        """`List[str]`. The domains which should be managed by this instance.
+        For example, the doamin in email address: "random.one@foo.bar" will be seen as local mail address if "foo.bar" in mydomains,
+        all messages sent to the address will be processed as local delivering."""
         self.hostname = hostname
-        self.database_path = database_path
+        """`str`. The hostname of this server. Don't confuse it to `mydomains`, it's the name of this server.
+        Typically it's the default domain for this instance."""
+        self.database_path: str = database_path
+        """`str`. The path to database"""
         self.database = UnQLite(database_path)
+        """Database instance. Notice that this property may not be avaliable in future."""
         self.storage_hub = StorageHub(self.database)
+        """`mailboat.StorageHub`. The references to all storages in mailboat."""
         self.transfer_agent = TransferAgent(
             mydomains=mydomains,
             local_delivery_handler=self.handle_local_delivering,
@@ -53,22 +73,36 @@ class Mailboat(object):
             smtpd_port=smtpd_port,
             auth_require_tls=auth_require_tls,
         )
+        """`mailboat.mta.TransferAgent`. The transfer agent for this instance."""
         self.auth_provider = AuthProvider(
             self.storage_hub.user_records, self.storage_hub.token_records
         )
+        """`mailboat.usrsys.auth.AuthProvider`. The auth provider for this instance."""
         super().__init__()
 
     @property
     def smtpd_port(self):
+        "Mail Transfer Agent's smtpd port."
         return self.transfer_agent.smtpd_port
 
     @property
     def auth_require_tls(self) -> bool:
+        """This property defines should the SMTP Server enable the auth module for non-TLS connections."""
         return self.transfer_agent.auth_require_tls
 
     async def handle_smtpd_auth(
         self, server: SMTP, method: str, data: Any
     ) -> AuthResult:
+        """This function is to handle authentication requests from SMTP server.
+
+        Current supported methods:
+        - login
+        - plain
+
+        Related:
+
+        - `mailboat.mta.TransferAgent`
+        """
         if method == "login" or method == "plain":
             assert isinstance(data, LoginPassword)
             username: bytes = data.login
@@ -82,19 +116,40 @@ class Mailboat(object):
             return AuthResult(success=False, handled=False)
 
     async def handle_local_delivering(self, message: EmailMessage):
+        """This function is to handle local delivering (emails sent to local mail addresses), mostly from the mail transfer agent.
+
+        Related:
+
+        - `mailboat.mta.TransferAgent`
+        """
         delivered_to = message["delivered-to"]
         raise NotImplementedError
         # TODO (rubicon): complete local delivering
 
     def start(self):
+        """Start the engine!
+
+        Related:
+
+        - `mailboat.mta.TransferAgent.start`
+        """
         self.transfer_agent.start()
 
     def stop(self):
+        """Stop the mailboat instance.
+
+        Related:
+
+        - `mailboat.mta.TransferAgent.destory`
+        """
         self.transfer_agent.destory()
 
     async def new_user(
         self, username: str, nickname: str, email_address: str, password: str
     ) -> UserRecord:
+        """Create a new user. This method is used for programmaic uses from outside, it does access the storage directly.
+        For internal uses please turn to `mailboat.StorageHub.create_user`.
+        """
         user = await self.storage_hub.create_user(username, password.encode("ascii"))
         user.nickname = nickname
         user.email_address = email_address
