@@ -19,7 +19,7 @@ import pytest
 import aiosmtplib
 from aioimaplib import aioimaplib
 from email.message import EmailMessage
-from mailboat.mailboat import Mailboat
+from mailboat import Mailboat
 
 
 def imap_response_find_value_of(data: list[str], key: str) -> Optional[str]:
