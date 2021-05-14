@@ -16,10 +16,7 @@
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
 
 """
-About mailstore
-
-`MailStore` just care about mails -
-it does not know the directory structure, even the user owns it. It just store mails by their message identities.
+`MailStore` store mails by their message identities.
 """
 
 from email.message import EmailMessage
@@ -34,19 +31,30 @@ from .utils.storage import (
 
 @dataclass
 class MailStoreRecord(object):
+    """A record for storing email.
+
+    Attributes:
+        message_id: A `str` of "message-id" from one email.
+        raw_email: The `str` from `email.message.EmailMessage.as_string`.
+        ref_count: A `int` which maintains for garbage collecting.
+    """
+
     message_id: str
     raw_mail: str
     ref_count: int
 
 
 class MailStore(CommonStorageRecordWrapper[MailStoreRecord]):
-    """Interface for emails."""
+    """Interface for email storing.
+
+    ..note:: This storage identify messages by the header "message-id".
+    """
 
     def __init__(self, common_storage: CommonStorage) -> None:
         super().__init__(common_storage, DataclassCommonStorageAdapter(MailStoreRecord))
 
     async def store_mail(self, mail: EmailMessage) -> MailStoreRecord:
-        """store a mail with it's message id."""
+        """Store a mail with it's message id."""
         assert "message-id" in mail
         msg_id = mail["message-id"]
         record = await self.find_one({"message_id": msg_id})
@@ -64,8 +72,12 @@ class MailStore(CommonStorageRecordWrapper[MailStoreRecord]):
             return new_record
 
     async def deref_mail_by_id(self, message_id: str) -> Optional[MailStoreRecord]:
-        """Decrease reference count of a mail with `message_id`.
-        If the mail's reference count is not greater than zero, it will be deleted.
+        """Less the mail's reference count by 1.
+        If the mail's reference count is not greater than zero, the mail will be deleted.
+        Return `None` only when the message not found.
+
+        Args:
+            message_id: the message-id of the mail
         """
         record = await self.find_one({"message_id": message_id})
         if record:
