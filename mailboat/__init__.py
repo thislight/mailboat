@@ -57,10 +57,11 @@ class Mailboat(object):
         For example, the doamin in email address: "random.one@foo.bar" will be seen as local mail address if "foo.bar" in mydomains,
         all messages sent to the address will be processed as local delivering."""
         self.hostname = hostname
-        """`str`. The hostname of this server. Don't confuse it to `mydomains`, it's the name of this server.
+        """`str`. The hostname of this server. Don't confuse it to `mydomains`, `hostname` is the name of this server.
         Typically it's the default domain for this instance."""
         self.database_path: str = database_path
-        """`str`. The path to database"""
+        """`str`. The path to database. Currently it's a file path or ":mem:".
+        ":mem:" tells UnQLite open database in memory."""
         self.database = UnQLite(database_path)
         """Database instance. Notice that this property may not be avaliable in future."""
         self.storage_hub = StorageHub(self.database)
