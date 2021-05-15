@@ -14,3 +14,8 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+
+"""Utilities.
+
+These modules does not depends on any other concepts of Mailboat.
+"""
