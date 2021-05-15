@@ -14,10 +14,17 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+"""`Generating204Handler`: A simple tornado handler for client network checking.
+"""
 
 from .base import BaseRequestHandler
 
 
 class Generating204Handler(BaseRequestHandler):
+    """A simple tornado handler for client network checking.
+
+    Return 204 as status code when client requesting with "GET" method.
+    """
+
     def get(self):
         self.set_status(204)

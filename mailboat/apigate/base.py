@@ -14,11 +14,28 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+"""`BaseRequestHandler`: the tools used in tornado handlers.
+"""
 from tornado.web import RequestHandler
 from mailboat.storagehub import StorageHub
 
 
 class BaseRequestHandler(RequestHandler):
+    """The tools used while handling requests.
+
+    Typical usage:
+    Use it instead of `tornado.web.RequestHandler`.
+    ````python
+    class FooRequestHandler(BaseRequestHandler):
+        ...
+    ````
+    """
+
     def initialize(self) -> None:
         settings = self.application.settings
-        self.storage_hub: StorageHub = settings["storage_hub"]
+        self._storage_hub: StorageHub = settings["storage_hub"]
+
+    @property
+    def storage_hub(self) -> StorageHub:
+        """Storage hub of the instance."""
+        return self._storage_hub

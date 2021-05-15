@@ -145,6 +145,7 @@ class Mailboat(object):
         Related:
 
         - `mailboat.mta.TransferAgent.start`
+        - `mailboat.apigate.HTTPAPIGateway.start`
         """
         self.transfer_agent.start()
         await self.http_api_gate.start()
@@ -155,6 +156,7 @@ class Mailboat(object):
         Related:
 
         - `mailboat.mta.TransferAgent.destory`
+        - `mailboat.apigate.HTTPAPIGateway.stop`
         """
         self.transfer_agent.destory()
         await self.http_api_gate.stop()
