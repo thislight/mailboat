@@ -56,13 +56,13 @@ class HTTPAPIGateway(object):
     @property
     def http_binds(self) -> List[Tuple[Optional[str], int]]:
         """The tcp binds for HTTP server.
-        Each element in the list is a tuple of (<binding address/hostname/None>, <port>).
+        Each element in the list is a tuple of (binding address/hostname/None, port).
 
         For example:
 
         - `("127.0.0.1", 1989)` binds the port 1989 on address 127.0.0.1.
         - `("::0", 525)` binds the port 525 on address ::0.
-        - `("mycomputer.local", 604) binds the port 604 on hostname mycomputer.local.
+        - `("mycomputer.local", 604)` binds the port 604 on hostname mycomputer.local.
         - `(None, 8080)` binds port 8080 on all network interfaces.
 
         Related:
@@ -104,7 +104,12 @@ class HTTPAPIGateway(object):
         self._http_server = None
 
     def http_client(self) -> AsyncClient:
-        """Return a http client from httpx which uses the first bind from `HTTPAPIGateway.http_binds` as base url."""
+        """Return a http client from httpx which uses the first bind from `HTTPAPIGateway.http_binds` as base url.
+
+        Related:
+
+        - [httpx documentation](https://www.python-httpx.org/)
+        """
         assert self._http_server
         address, port = self.http_binds[0]
         if not address:
