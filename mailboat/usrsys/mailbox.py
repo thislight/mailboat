@@ -19,10 +19,11 @@
 """
 from email.message import EmailMessage
 from typing import AsyncIterator, Optional, Tuple
-from .usr import MailBoxRecord
+from .usr import MailBoxRecord, MailRecord
 from ..mailstore import MailStore, MailStoreRecord
 from ..utils.storage import CommonStorage
 from .storage import MailBoxRecordStorage, MailRecordStorage
+from ..utils.msgid import MessageID
 
 
 class MailBox(object):
@@ -44,11 +45,13 @@ class MailBox(object):
         mail_rec_storage: MailRecordStorage,
         mail_store: MailStore,
         mailbox_rec_storage: MailBoxRecordStorage,
+        domain: str,
     ) -> None:
         self.mailbox_record = mailbox_rec
         self.mail_record_storage = mail_rec_storage
         self.mail_store = mail_store
         self.mailbox_record_storage = mailbox_rec_storage
+        self.domain = domain
         super().__init__()
 
     @property
@@ -59,3 +62,15 @@ class MailBox(object):
     @property
     def readonly(self):
         return False  # TODO: implement readonly mailbox
+
+    async def append(self, mail: EmailMessage):
+        message_id = mail["message-id"]
+        if not message_id:
+            message_id = MessageID.new(
+                self.domain
+            ).message_id()  # TODO: do we need to move it into storage layer?
+            mail["message-id"] = message_id
+        await self.mail_store.store_mail(mail)
+        await self.mail_record_storage.store(
+            MailRecord(mailbox_id=self.mailbox_record.identity, message_id=message_id)
+        )

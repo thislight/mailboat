@@ -1,7 +1,7 @@
 """This module contains definitions about users, profiles and mailboxes.
 """
-from dataclasses import dataclass
-from typing import Dict, Literal, Optional, Set
+from dataclasses import dataclass, field
+from typing import Dict, Literal, Optional, Set, List
 
 
 MAILBOX_INBOX = "Inbox"
@@ -94,3 +94,4 @@ class MailRecord(object):
 
     mailbox_id: str
     message_id: str
+    flags: List[str] = field(default_factory=list)
