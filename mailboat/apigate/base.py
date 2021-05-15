@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
 from tornado.web import RequestHandler
-from mailboat import StorageHub
+from mailboat.storagehub import StorageHub
 
 
 class BaseRequestHandler(RequestHandler):

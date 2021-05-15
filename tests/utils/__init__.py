@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
 import pytest
-from mailboat.mailboat import Mailboat
+from mailboat import Mailboat
 
 
 @pytest.fixture

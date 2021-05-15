@@ -14,19 +14,29 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+"""Simple tools to count references in memory: `Ref`.
+"""
 from typing import Generic, TypeVar
 
 T = TypeVar("T")
 
 
 class Ref(Generic[T]):
+    """This class is provided as a tool to count references in memory."""
+
     def __init__(self, val: T) -> None:
         self.val = val
+        """The value. Access to the value does not trigger any counting.
+        """
         self.refc = 0
+        """`int`. The reference counts.
+        """
 
     def ref(self) -> T:
+        """Add one to the reference counts and return the value."""
         self.refc += 1
         return self.val
 
     def unref(self) -> None:
+        """Less the reference counts by one."""
         self.refc -= 1

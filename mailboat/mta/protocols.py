@@ -14,23 +14,43 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
+"""All the protocol types for `mailboat.mta`.
+"""
+
 from typing import Protocol, Callable, Awaitable, Any, Tuple
 from aiosmtpd.smtp import AuthResult, SMTP
 from email.message import EmailMessage
 
 LocalDeliveryHandler = Callable[[EmailMessage], Awaitable[Any]]
-SMTPAuthHandler = Callable[
-    [SMTP, str, Any], Awaitable[AuthResult]
-]  # the second parameter is method, the third is the data.
-# As method "login", "plain", the data is a `LoginPassword`
+"""A type for handler which do local delivery process."""
+
+
+SMTPAuthHandler = Callable[[SMTP, str, Any], Awaitable[AuthResult]]
+"""A type for handler which do SMTP server authentication process.
+The second parameter is method, the third is the data. As method "login", "plain", the data is a `LoginPassword`
+"""
 
 
 class EmailQueue(Protocol):
+    """A protocol type for an email queue which is to store coming emails in mail transfering process.
+
+    It's no order promise to this protocol, but typically the implementation should be in FIFO order.
+
+    Related:
+
+    - `mailboat.mta.TransferAgent`
+    """
+
     def get(self) -> Awaitable[Tuple[EmailMessage, int]]:
+        """Get one email from queue.
+        The second entity of the result is the index, which can be used to remove the mail from the queue.
+        """
         ...
 
     def remove(self, index: int) -> Awaitable[None]:
+        """Remove the email as `index` in the queue."""
         ...
 
     def put(self, email: EmailMessage) -> Awaitable[None]:
+        """Put one `email` into queue."""
         ...

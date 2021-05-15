@@ -1,3 +1,14 @@
+"""The abstract storage layer of Mailboat.
+
+The abstract storage layer of Mailboat is centred on the concept of Record, which is the smallest storable unit in the abstract storage layer and can be either an atomic type or a composite type (see `RecordStorage`).
+
+But in practice we cannot safely store an arbitrary composite type (say any Dataclass), so a special case of `RecordStorage` has been added to the abstract storage layer: `CommonStorage`. A `CommonStorage` is actually a `RecordStorage` with a dictionary of Record type with a string type as a key. We can also see this in its type definition.
+
+However, we often want to read and write directly to a specific type rather than a dictionary. Reading and writing directly to a specific type allows for easier syntax and code completion, but we also don't want to write a new Storage class for each new type.
+At this point we can note that `CommonStorage` stores values in a dictionary, and in most cases our data can be converted directly to a dictionary. This module provides a tool class for this usage: `CommonStorageRecordWrapper`. All you need to do is provide a `CommonStorage` and a `CommonStorageAdapter` that takes care of the type conversion to create a `RecordStorage` that reads and writes with a specific type of `RecordStorage` that reads and writes Record with a specific type.
+
+Most of the data structures in Mailboat are declared with `dataclasses.dataclass`. For ease of use, this module provides a direct implementation of `CommonStorageAdapter` for it: `DataclassCommonStorageAdapter`.
+"""
 from typing import (
     Any,
     AsyncIterable,
@@ -14,50 +25,70 @@ T = TypeVar("T")
 
 
 class RecordStorage(Generic[T]):
+    """A protocol type which describes basic database operations on a type.
+
+    .. TODO:: Transation should be implemented to provide a way for atomic data operations.
+
+    This class describes all queries in `dict` with `str` as key.
+    """
+
     def store(self, record: T) -> Awaitable[T]:
+        """Save a record as new."""
         ...
 
     def find(self, query: Dict[str, Any]) -> AsyncIterable[T]:
+        """Find records which completely matchs `query`."""
         ...
 
     def find_one(self, query: Dict[str, Any]) -> Awaitable[Optional[T]]:
+        """Find one record which completely matchs `query`."""
         ...
 
     def update_one(self, query: Dict[str, Any], updated: T) -> Awaitable[Optional[T]]:
+        """Replace one record, which matchs `query`, with `updated`."""
         ...
 
     def remove_one(self, query: Dict[str, Any]) -> Awaitable[bool]:
+        """Remove one record which matches `query`."""
         ...
 
     def remove(self, query: Dict[str, Any]) -> Awaitable[int]:
+        """Remove all records match `query`."""
         ...
 
 
 class CommonStorage(RecordStorage[Dict[str, Any]]):
+    """A protocol type which is `RecordStorage` with `Dict[str, Any]` (read/write `dict`) for general purpose."""
+
     pass
 
 
 class CommonStorageAdapter(Generic[T]):
     """Adapter for `CommonStorageRecordWrapper`.
     Implement `record2dict` and `dict2record` to transform the data between record and dict.
+
+    Typically used in `CommonStorageRecordWrapper`.
     """
 
     def record2dict(self, record: T) -> Dict[str, Any]:
+        """Build a `dict` from `record`."""
         ...
 
     def dict2record(self, d: Dict[str, Any]) -> T:
+        """Build a record from a `d`."""
         ...
 
 
 class CommonStorageRecordWrapper(RecordStorage[T]):
     """
-    A wrapper for `CommonStorage`, convert it to a `RecordStorage` which can read and write record directly.
-    The correct way to use this class is to extend this class. For example:
+    A wrapper for `CommonStorage`, convert the common storage to a `RecordStorage` which can read and write a record type directly.
 
-    ````
+    The typical way to use this class is to extend this class, pass though the common storage and add an implementation of `CommonStorageAdapter`. For example:
+
+    ````python
     class UserRecordStorage(CommonStorageRecordWrapper[UserRecord]):
-    def __init__(self, common_storage: CommonStorage) -> None:
-        super().__init__(common_storage, DataclassCommonStorageAdapter(UserRecord))
+        def __init__(self, common_storage: CommonStorage) -> None:
+            super().__init__(common_storage, DataclassCommonStorageAdapter(UserRecord))
     ````
     """
 
@@ -103,8 +134,9 @@ import dataclasses
 
 
 class DataclassCommonStorageAdapter(Generic[T], CommonStorageAdapter[T]):
-    """A `CommonStorageAdapter` for dataclasses.
-    Warning: the checking is performed by dataclass itself. Dataclasses does not check the actual data type.
+    """A `CommonStorageAdapter` for `dataclasses`.
+
+    ..warning:: the checking is performed by dataclass itself. `dataclasses` does not check the actual data type, but checking the fields given.
     """
 
     def __init__(self, datacls: Type[T]) -> None:
@@ -125,10 +157,24 @@ class DataclassCommonStorageAdapter(Generic[T], CommonStorageAdapter[T]):
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
-from unqlite import UnQLite
+from unqlite import UnQLite, Collection
 
 
 class UnQLiteStorage(CommonStorage):
+    """An implementation of `CommonStorage` for `unqlite.UnQLite`.
+
+    .. note:: This implementation using thead pool to avoid main thread blocking
+        The API of `unqlite-python` is synchrounous. To prevent main thread blocking It is wrapped with thread pool executor.
+        But the effects should be researched in future.
+
+    .. caution:: I/O operation may unexceptedly block the main thread in constructing.
+        The collection is created in constructor， and it may contains I/O operations.
+
+    Related:
+
+    - [unqlite-python API documentation](https://unqlite-python.readthedocs.io/en/latest/api.html)
+    """
+
     def __init__(self, instance: UnQLite, collection_name: str) -> None:
         self.executor = ThreadPoolExecutor(
             thread_name_prefix="mailboat.utils.storage.UnQLiteStorage.executor"
@@ -136,14 +182,26 @@ class UnQLiteStorage(CommonStorage):
         self.instance = instance
         self.collection_name = collection_name
         self.global_collection = self.new_collection
+        """The collection used for storing records.
+
+        ..danger:: Don't use it to U(pdate)R(emove)D(elete).
+            The query process in URD will change the internal state of this instance of `unqlite.Collection`.
+            It leads to unexecpted behaviours.
+        """
         self.global_collection.create()
         super().__init__()
 
     @property
-    def new_collection(self):
+    def new_collection(self) -> Collection:
+        """Return a new collection.
+
+        ..note:: (Rubicon) As the unqlite-python documentation, `unqlite.Collection` actually mantains states (seems like `unqlite.Cursor`) in it.
+            We should create a new collection to prevent accidents in concurrent environment.
+        """
         return self.instance.collection(self.collection_name)
 
     def store_sync(self, record: Dict[str, Any]) -> Dict[str, Any]:
+        """Store the `record` without thread pool."""
         self.global_collection.store(record)
         return record
 
@@ -154,6 +212,7 @@ class UnQLiteStorage(CommonStorage):
 
     @classmethod
     def doc_match(cls, doc: Dict[str, Any], match: Dict[str, Any]) -> bool:
+        """Check if `doc` completely matchs `match`."""
         for k in match:
             if k in doc:
                 if match[k] == doc[k]:

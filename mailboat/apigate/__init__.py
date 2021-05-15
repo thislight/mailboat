@@ -18,7 +18,7 @@ from .g204 import Generating204Handler
 from typing import List, Optional, Tuple
 from tornado.web import Application
 from tornado.httpserver import HTTPServer
-from mailboat import StorageHub
+from mailboat.storagehub import StorageHub
 from httpx import AsyncClient
 
 

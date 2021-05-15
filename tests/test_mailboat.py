@@ -19,7 +19,7 @@ import pytest
 import aiosmtplib
 from aioimaplib import aioimaplib
 from email.message import EmailMessage
-from mailboat.mailboat import Mailboat
+from mailboat import Mailboat
 from .utils import mailboat
 
 

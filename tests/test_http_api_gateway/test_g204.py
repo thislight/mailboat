@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Mailboat.  If not, see <http://www.gnu.org/licenses/>.
-from mailboat.mailboat import Mailboat
+from mailboat import Mailboat
 from ..utils import mailboat
 import pytest
 
